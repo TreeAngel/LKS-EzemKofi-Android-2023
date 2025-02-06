@@ -1,6 +1,5 @@
 package com.example.ezemkofi.model.request
 
-
 import com.google.gson.annotations.SerializedName
 
 data class LoginRequest(

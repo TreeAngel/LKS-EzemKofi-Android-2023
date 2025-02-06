@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.converter.scalars)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

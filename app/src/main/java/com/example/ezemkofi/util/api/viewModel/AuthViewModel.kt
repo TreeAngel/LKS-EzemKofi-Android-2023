@@ -5,29 +5,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ezemkofi.model.request.LoginRequest
 import com.example.ezemkofi.model.request.RegisterRequest
-import com.example.ezemkofi.model.respond.MeRespond
-import com.example.ezemkofi.util.TokenManager
+import com.example.ezemkofi.util.api.repository.AuthRepository
 import com.example.ezemkofi.util.api.retrofit.RetrofitClient
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
-    private val _authState = MutableStateFlow<String?>(null)
-    val authState: StateFlow<String?> = _authState
+class AuthViewModel: ViewModel() {
+    private val repository = AuthRepository(RetrofitClient.getInstance())
 
-    private val _userProfile = MutableStateFlow<MeRespond?>(null)
-    val userProfile: StateFlow<MeRespond?> = _userProfile
-
-    fun login(context: Context, request: LoginRequest) {
+    fun login(request: LoginRequest) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.getInstance(context).login(request)
-                TokenManager.saveToken(context, response.token)
-                _authState.value = response.token
+                val respond = repository.login(request)
+                RetrofitClient.setToken(respond)
             } catch (e: Exception) {
                 e.printStackTrace()
-                _authState.value = null
+                RetrofitClient.clearToken()
             }
         }
     }
@@ -35,12 +27,9 @@ class AuthViewModel : ViewModel() {
     fun register(context: Context, request: RegisterRequest) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.getInstance(context).register(request)
-                TokenManager.saveToken(context, response.token)
-                _authState.value = response.token
+
             } catch (e: Exception) {
                 e.printStackTrace()
-                _authState.value = null
             }
         }
     }
@@ -48,14 +37,9 @@ class AuthViewModel : ViewModel() {
     fun getUserProfile(context: Context) {
         viewModelScope.launch {
             try {
-                val token = TokenManager.getToken(context)
-                if (!token.isNullOrEmpty()) {
-                    val response = RetrofitClient.getInstance(context).getProfile(token)
-                    _userProfile.value = response
-                }
+
             } catch (e: Exception) {
                 e.printStackTrace()
-                _userProfile.value = null
             }
         }
     }
