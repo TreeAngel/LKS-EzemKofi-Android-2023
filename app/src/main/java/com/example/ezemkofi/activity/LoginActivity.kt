@@ -2,6 +2,7 @@ package com.example.ezemkofi.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -10,8 +11,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.ezemkofi.R
 import com.example.ezemkofi.databinding.ActivityLoginBinding
+import com.example.ezemkofi.model.ApiResponse
 import com.example.ezemkofi.model.request.LoginRequest
-import com.example.ezemkofi.util.api.retrofit.RetrofitClient
 import com.example.ezemkofi.util.api.viewModel.AuthViewModel
 
 class LoginActivity : AppCompatActivity() {
@@ -31,6 +32,35 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
+        viewModel.loginState.observe(this@LoginActivity) {
+            when (it) {
+                is ApiResponse.Success -> {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Login success ${it.data}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    binding.btnLogin.visibility = View.VISIBLE
+                    binding.loadingBar.visibility = View.GONE
+                }
+
+                is ApiResponse.Error -> {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "Login failed: ${it.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    binding.btnLogin.visibility = View.VISIBLE
+                    binding.loadingBar.visibility = View.GONE
+                }
+
+                is ApiResponse.Loading -> {
+                    binding.btnLogin.visibility = View.GONE
+                    binding.loadingBar.visibility = View.VISIBLE
+                }
+            }
+        }
+
         binding.btnLogin.setOnClickListener {
             val username = binding.etUsername.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
@@ -43,17 +73,18 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             viewModel.login(LoginRequest(password, username))
-            if (!RetrofitClient.getToken().isNullOrEmpty()) Toast.makeText(
-                this@LoginActivity,
-                "Success login/n ${RetrofitClient.getToken()}",
-                Toast.LENGTH_SHORT
-            ).show()
-            else Toast.makeText(
-                this@LoginActivity,
-                "Fail login, invalid credentials",
-                Toast.LENGTH_SHORT
-            )
-                .show()
+//            if (!RetrofitClient.getToken().isNullOrEmpty())
+//                Toast.makeText(
+//                    this@LoginActivity,
+//                    "Success login/n ${RetrofitClient.getToken()}",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            else
+//                Toast.makeText(
+//                    this@LoginActivity,
+//                    "Fail login, invalid credentials",
+//                    Toast.LENGTH_SHORT
+//                ).show()
         }
         binding.tvCreateAccount.setOnClickListener {
             startActivity(Intent(this@LoginActivity, RegisterActivity::class.java))
